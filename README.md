@@ -10,34 +10,67 @@ To be honest I found the Microsoft IObserver and IObservable approach a bit too 
 ## How
 First, wrap the value you want observed, so instead of
 
-```
-public class Thing
-{
-  public string message;
-}
-```
-you would have
+## Example
+Suppose we have a typical situation where client class needs to update when a global static value changes. The normal way would be to regularly update the client, which polls the value and compares it to the previous value.
 
+Like this:
 ```
-public class Thing
+public class ApplicationState
 {
-  public Observable<string> message = new Observable<string>();
-}
-```
-
-and then you can have other objects bind to receive calls when the value changes:
-```
-public OtherClass()
-{
-  // Bind to the observable
-  thing.message.Bind(UpdateOutput);
+  public static string message;
+  
+  private void SomeFunction()
+  {
+    message = "Something";
+  }
 }
 
-private void UpdateOutput(string newMessageValue)
+public class Client
 {
-   // called whenever message changes value
+  private string oldMessage;
+  
+  public void Update()
+  {
+    // poll ApplicationState.message and see if it has changed
+    if(oldMessage != ApplicationState.message)
+    {
+      OnMessageChanged(ApplicationState.message);
+      oldMessage = ApplicationState.message;
+    }
+  }
+  
+  private void OnMessageChange(string newMessageValue)
+  {
+    // do the necessary
+  }
 }
 ```
+With Observable, we would wrap the global static value and then bind a callback to it, like this:
+```
+public class ApplicationState
+{
+  public static Observable<string> message = new Observable<string>();
+  
+  private void SomeFunction()
+  {
+    message.value = "Something";
+  }
+}
+
+public class Client
+{
+  public Client() // constructor
+  {
+    ApplicationState.message.Bind(OnMessageChange);
+  }
+
+  private void OnMessageChange(string newMessageValue)
+  {
+    // do the necessary
+  }
+}
+```
+The Observable version is easier to read, and doesn't require continually updating the client object. Yay!
 
 ## Limitations
 There's no fancy threading or error handling; this is basically just a wrapper around System.Action<T> with no checking that observers still exist.
