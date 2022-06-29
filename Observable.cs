@@ -35,9 +35,14 @@ public class Observable<T>
 	{
 		if (!object.Equals(_value, value))
 		{
-			_value = value;
-			callbacks.Invoke(value);
+			ForceSet(value);
 		}
+	}
+
+	public void ForceSet(T value)
+	{
+		_value = value;
+		callbacks.Invoke(value);
 	}
 
 	public T Get()
