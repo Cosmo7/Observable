@@ -42,7 +42,11 @@ public class Observable<T>
 	public void ForceSet(T value)
 	{
 		_value = value;
-		callbacks.Invoke(value);
+
+		if (callbacks != null)
+		{
+			callbacks.Invoke(value);
+		}
 	}
 
 	public T Get()
