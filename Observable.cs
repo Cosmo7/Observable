@@ -16,6 +16,7 @@
 
 using System;
 
+
 public class Observable<T>
 {
 	private T _value;
@@ -31,12 +32,17 @@ public class Observable<T>
 		_value = initialValue;
 	}
 
-	public void Set(T value)
+	public bool Set(T value)
 	{
-		if (!object.Equals(_value, value))
+		// returns true if value changed
+		var change = !object.Equals(_value, value);
+
+		if (change)
 		{
 			ForceSet(value);
 		}
+
+		return change;
 	}
 
 	public void ForceSet(T value)
